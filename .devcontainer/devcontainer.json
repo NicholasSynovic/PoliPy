@@ -1,0 +1,20 @@
+{
+    "name": "PoliPy",
+    "extensions": [
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "lextudio.restructuredtext",
+        "yzhang.markdown-all-in-one"
+    ],
+    "settings": {
+        "python.autoComplete.addBrackets": true,
+        "python.autoUpdateLanguageServer": true,
+        "python.formatting.provider": "black",
+        "python.languageServer": "Pylance",
+        "python.linting.enabled": true,
+        "python.testing.unittestEnabled": true,
+        "python.analysis.completeFunctionParens": true,
+        "restructuredtext.linter.run": "onSave"
+    },
+    "dockerFile": "Dockerfile",
+}

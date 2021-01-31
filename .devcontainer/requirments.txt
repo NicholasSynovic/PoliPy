@@ -1,0 +1,7 @@
+beautifulsoup4
+black
+colorama
+isort
+lxml
+requests
+tqdm
