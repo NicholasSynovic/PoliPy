@@ -2,7 +2,6 @@ from json import dumps
 
 import requests
 from bs4 import BeautifulSoup
-from requests import Response
 
 
 class CongressAPI:
