@@ -1,5 +1,5 @@
-import unittest
 import os
+import unittest
 from sqlite3 import Connection
 
 import databaseConnector
