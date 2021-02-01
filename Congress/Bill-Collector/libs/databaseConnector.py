@@ -1,5 +1,4 @@
 import sqlite3
-from os import error
 from sqlite3 import Connection, OperationalError
 
 
@@ -30,7 +29,7 @@ class DatabaseConnector:
                 connection.execute(sql)
             else:
                 connection.execute(sql, options)
-        except OperationalError as error:
+        except OperationalError:
             return False
         connection.commit()
         return True
