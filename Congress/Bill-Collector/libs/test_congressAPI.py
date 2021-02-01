@@ -1,8 +1,5 @@
 import unittest
 
-import bs4
-import requests
-
 import congressAPI
 
 
