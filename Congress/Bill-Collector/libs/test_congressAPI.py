@@ -25,8 +25,6 @@ class Test_CongressAPI(unittest.TestCase):
     def test_SendRequest(self):
         c3 = congressAPI.CongressAPI().sendRequest()
         self.assertIs(list, type(c3))
-        self.assertIs(bs4.BeautifulSoup, type(c3[0]))
-        self.assertIs(requests.models.Response, type(c3[1]))
         self.assertEqual(200, c3[1].status_code)
 
 
