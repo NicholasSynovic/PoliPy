@@ -13,6 +13,15 @@
         "python.linting.enabled": true,
         "python.testing.unittestEnabled": true,
         "python.analysis.completeFunctionParens": true,
+        "python.testing.unittestArgs": [
+            "-v",
+            "-s",
+            "./Congress",
+            "-p",
+            "test_*.py"
+        ],
+        "python.testing.pytestEnabled": false,
+        "python.testing.nosetestsEnabled": false,
     },
     "dockerFile": "Dockerfile",
 }
