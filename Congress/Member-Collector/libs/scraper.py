@@ -1,5 +1,6 @@
 from bs4 import BeautifulSoup, Tag
 import re
+from tqdm import tqdm
 
 
 class Scraper:
@@ -32,7 +33,7 @@ class Scraper:
         dataPoints = []
         response = self.soup.find_all(name="li", attrs={"class": "expanded"})
         index = 0
-        while True:
+        for dataPoint in tqdm(response, desc="Finding Member Front Matter"):
             try:
                 dataPoint = response[index]
                 primaryKey = index + 1
@@ -45,8 +46,10 @@ class Scraper:
                 break
         return dataPoints
 
-    def scrape_MemberDataPoints(self, member: Tag, chamber: str = "House") -> tuple:
-        # (Chamber, Name, URL, State, District, Party)
+    def scrape_MemberDataPoints(
+        self, primaryKey: int, member: Tag, chamber: str = "House"
+    ) -> tuple:
+        # (ID, Chamber, Name, URL, State, District, Party)
         def _get_Name(string: str) -> str:
             name = ""
             positions = [
@@ -83,4 +86,12 @@ class Scraper:
 
         partyData = items[-2].find(name="span").text
 
-        return (chamber, nameData, urlData, stateData, districtData, partyData)
+        return (
+            primaryKey,
+            chamber,
+            nameData,
+            urlData,
+            stateData,
+            districtData,
+            partyData,
+        )
