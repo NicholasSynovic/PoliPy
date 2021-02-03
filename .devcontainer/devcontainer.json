@@ -1,28 +1,27 @@
 {
     "name": "PoliPy",
     "extensions": [
-		"ms-python.python",
-		"ms-python.vscode-pylance",
-		"yzhang.markdown-all-in-one",
-		"ms-azuretools.vscode-docker"
-	],
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "yzhang.markdown-all-in-one",
+        "ms-azuretools.vscode-docker"
+    ],
     "settings": {
         "python.autoComplete.addBrackets": true,
         "python.autoUpdateLanguageServer": true,
         "python.formatting.provider": "black",
         "python.languageServer": "Pylance",
         "python.linting.enabled": true,
-        "python.testing.unittestEnabled": true,
-        "python.analysis.completeFunctionParens": true,
         "python.testing.unittestArgs": [
             "-v",
             "-s",
-            "./Congress",
+            "./Congress/Bill-Collector/libs",
             "-p",
             "test_*.py"
         ],
         "python.testing.pytestEnabled": false,
         "python.testing.nosetestsEnabled": false,
+        "python.testing.unittestEnabled": true
     },
     "dockerFile": "Dockerfile",
 }
