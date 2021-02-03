@@ -28,21 +28,21 @@ class Scraper:
         pages = _get_Data(string=response[1].text)
         return (items, pages)
 
-    def get_DataPoints(self) -> list:
+    def get_DataPoints(self, startingPK: int = 0) -> list:
         # (Primary Key, Type, Data)
         dataPoints = []
         response = self.soup.find_all(name="li", attrs={"class": "expanded"})
-        index = 0
-        for dataPoint in tqdm(response, desc="Finding Member Front Matter"):
+        pointer = 0
+        for dataPoint in response:
             try:
-                dataPoint = response[index]
-                primaryKey = index + 1
+                dataPoint = response[pointer]
+                primaryKey = startingPK + pointer + 1
                 dataType = dataPoint.find(
                     name="span", attrs={"class": "visualIndicator"}
                 ).text.capitalize()
                 dataPoints.append((primaryKey, dataType, dataPoint))
-                index += 1
-            except IndexError:
+                pointer += 1
+            except IndexError as e:
                 break
         return dataPoints
 

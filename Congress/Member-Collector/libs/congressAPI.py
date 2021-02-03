@@ -17,8 +17,12 @@ class CongressAPI:
         soup = BeautifulSoup(markup=req.content, features="lxml")
         return [soup, req]
 
-    def incrementPage(self) -> None:  # TODO: Write test
+    def incrementPage(self) -> int:  # TODO: Write test
         self.page += 1
-        self.url = "https://www.congress.gov/search?searchResultViewType=expanded&page={}&q={}".format(
-            self.page, dumps(self.query)
+        self.url = "https://www.congress.gov/search?searchResultViewType=expanded&pageSize=250&page={}&q={}".format(
+            self.page, self.query
         )
+        return self.page
+
+    def get_CurrentPage(self) -> int:
+        return self.page
