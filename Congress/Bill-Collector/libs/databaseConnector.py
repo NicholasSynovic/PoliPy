@@ -24,7 +24,7 @@ class DatabaseConnector:
                 connection.execute(sql)
             else:
                 connection.execute(sql, options)
-        except OperationalError:
+        except OperationalError as e:
             return False
         connection.commit()
         return True
