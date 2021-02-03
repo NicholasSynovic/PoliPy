@@ -1,5 +1,7 @@
+from os import write
 from libs import congressAPI, databaseConnector, scraper
 from json import dumps
+import csv
 
 
 class BillCollector:
@@ -20,7 +22,6 @@ class BillCollector:
 
 
 bc = BillCollector(congress=93, source="members", chamber="House")
-print(bc.c.url)
 bc.buildDatabase()
 bc.createScraper()
 
@@ -33,4 +34,12 @@ if c[1] > 100:
     print("Search to broad, narrow search to continue.")
     quit()
 
-print(len(bc.s.get_DataPoints()))
+onPageData = bc.s.get_DataPoints()
+
+with open("temp.csv", "w") as the_file:
+    csv.register_dialect("custom", delimiter=",", skipinitialspace=True)
+    writer = csv.writer(the_file, dialect="custom")
+    for memberIndex in range(len(onPageData)):
+        print(memberIndex + 1)
+        data = bc.s.scrape_MemberDataPoints(member=onPageData[memberIndex][2])
+        writer.writerow(data)
