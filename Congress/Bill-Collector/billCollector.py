@@ -19,7 +19,7 @@ class BillCollector:
         self.s = scraper.Scraper(soup=soup)
 
 
-bc = BillCollector(congress=93, source="legislation", chamber="House")
+bc = BillCollector(congress=93, source="members", chamber="House")
 print(bc.c.url)
 bc.buildDatabase()
 bc.createScraper()
@@ -32,3 +32,5 @@ c = bc.s.get_TotalNumberofPages()
 if c[1] > 100:
     print("Search to broad, narrow search to continue.")
     quit()
+
+print(len(bc.s.get_DataPoints()))

@@ -26,3 +26,21 @@ class Scraper:
         items = _getData(string=response[0].text)
         pages = _getData(string=response[1].text)
         return (items, pages)
+
+    def get_DataPoints(self) -> list:
+        # (Primary Key, Type, Data)
+        dataPoints = []
+        response = self.soup.find_all(name="li", attrs={"class": "expanded"})
+        index = 0
+        while True:
+            try:
+                dataPoint = response[index]
+                primaryKey = index + 1
+                dataType = dataPoint.find(
+                    name="span", attrs={"class": "visualIndicator"}
+                ).text.capitalize()
+                dataPoints.append((primaryKey, dataType, dataPoint))
+                index += 1
+            except IndexError:
+                break
+        return dataPoints
