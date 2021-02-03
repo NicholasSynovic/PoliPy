@@ -13,7 +13,7 @@ class BillCollector:
         self.s = None
 
     def buildDatabase(self) -> None:
-        sql = "CREATE TABLE FrontMatter (ID INTEGER, DocumentType TEXT, ShortTitle TEXT, DocumentLink TEXT, LongTitle TEXT, SponsorName TEXT, SponsorLink TEXT, IntroducedDate INTEGER, PublicLegislation TEXT, PrivateLegislation TEXT, CosponsorAmount INTEGER, CosponsorLink TEXT, CommitteesChamber TEXT, LatestActionChamber INTEGER, LatestActionDate INTEGER, LatestActionLink TEXT, TrackerStage TEXT, PRIMARY KEY(ID))"
+        sql = "CREATE TABLE FrontMatter (ID INTEGER, Chamber TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXt, PRIMARY KEY(ID))"
         self.d.executeSQL(sql=sql)
 
     def createScraper(self) -> None:
