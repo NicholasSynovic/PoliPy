@@ -1,2 +1,10 @@
 # PoliPy
-A Python based tool suite to scrape and anlyze information from American government agencies.
+
+A Python application to create databases and conduct network analysis on American federal government agencies.
+
+---
+
+## Table of Contents
+
+- [PoliPy](#polipy)
+  - [Table of Contents](#table-of-contents)
