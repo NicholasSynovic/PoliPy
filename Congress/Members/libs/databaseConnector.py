@@ -1,12 +1,11 @@
 import sqlite3
-from sqlite3 import OperationalError
 
 from libs.cmdLineOutput import errorMessage, neutralMessage, positiveMessage
 
 
 class DatabaseConnector:
     def __init__(self, databaseFileName: str) -> None:
-        self.file = databaseFileName
+        self.file = r"database/" + databaseFileName
         print(neutralMessage(message="Trying to find file: {}".format(self.file)))
         try:
             with open(self.file, "r") as database:
