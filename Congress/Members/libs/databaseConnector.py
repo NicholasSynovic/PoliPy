@@ -1,6 +1,7 @@
 import sqlite3
-from sqlite3 import Connection, OperationalError
-from cmdLineOutput import positiveMessage, neutralMessage, errorMessage
+from sqlite3 import OperationalError
+
+from libs.cmdLineOutput import errorMessage, neutralMessage, positiveMessage
 
 
 class DatabaseConnector:
@@ -34,7 +35,16 @@ class DatabaseConnector:
                 connection.execute(sql)
             else:
                 connection.execute(sql, options)
-        except OperationalError as e:
+        except Exception as e:
+            print(
+                errorMessage(
+                    message="Exception raised with file {} when executing SQL: ".format(
+                        self.file
+                    )
+                    + e.__str__()
+                )
+            )
             return False
+            quit(1)
         connection.commit()
         return True

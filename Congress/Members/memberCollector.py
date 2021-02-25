@@ -2,13 +2,14 @@ from json import dumps
 
 from tqdm import tqdm
 
-from libs.cmdLineOutput import positiveMessage, neutralMessage, errorMessage
 from libs import congressAPI, databaseConnector, scraper
 from libs.cmdLineInterface import arguementHandling
+from libs.cmdLineOutput import errorMessage, neutralMessage, positiveMessage
 
 
 class MemberCollector:
     def __init__(self, **kwargs) -> None:
+        self.tableName: str
         self.kwargs = kwargs
         self.congressAPI = congressAPI.CongressAPI(dumps(kwargs))
         self.databaseConnector = databaseConnector.DatabaseConnector(
@@ -17,10 +18,17 @@ class MemberCollector:
         self.scraper = None
 
     def buildDatabase(self, chamber: str = "House") -> None:
-        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Chamber TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXT, PRIMARY KEY(ID))".format(
-            chamber + "_Members"
+        self.tableName = chamber + "_Members"
+        print(
+            neutralMessage(
+                message="Attempting to create table {}".format(self.tableName)
+            )
         )
-        self.databaseConnector.executeSQL(sql=frontmatterSQL)
+        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Chamber TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXT, PRIMARY KEY(ID))".format(
+            self.tableName
+        )
+        if self.databaseConnector.executeSQL(sql=frontmatterSQL):
+            print(positiveMessage(message="Created table {}".format(self.tableName)))
 
     def createScraper(self) -> None:
         soup = self.congressAPI.sendRequest()[0]
@@ -30,12 +38,6 @@ class MemberCollector:
         self.databaseConnector.executeSQL(sql=sql, options=options)
 
     def startScraper(self):
-        print(
-            "\nPoliPy: {} Congress {} Chamber Member Scraper".format(
-                str(self.kwargs["congress"]), self.kwargs["chamber"]
-            )
-        )
-
         currentPage = self.congressAPI.get_CurrentPage()
         self.buildDatabase()
         self.createScraper()  # Initial Search/ Page 1
@@ -53,11 +55,13 @@ class MemberCollector:
             pkCalculation = (currentPage - 1) * 250
             onPageData = self.scraper.get_DataPoints(startingPK=pkCalculation)
 
-            frontmatterSQL = "INSERT INTO FrontMatter (ID, Chamber, Name, URL, State, District, Party) VALUES (?,?,?,?,?,?,?)"
+            frontmatterSQL = "INSERT INTO {} (ID, Chamber, Name, URL, State, District, Party) VALUES (?,?,?,?,?,?,?)".format(
+                self.tableName
+            )
 
             for member in tqdm(
                 onPageData,
-                desc="Storing Member Front Matter (Page {})".format(currentPage),
+                desc="Storing {} (Page {})".format(self.tableName, currentPage),
             ):
                 memberDataPoint = self.scraper.scrape_MemberDataPoints(
                     primaryKey=member[0],
@@ -77,6 +81,12 @@ class MemberCollector:
 if __name__ == "__main__":
 
     cmdLineArgs = arguementHandling()
+
+    print(
+        "\nPoliPy: {} Congress {} Chamber Member Scraper".format(
+            str(cmdLineArgs.session[0]), cmdLineArgs.chamber[0]
+        )
+    )
 
     mc = MemberCollector(
         congress=cmdLineArgs.session[0],
