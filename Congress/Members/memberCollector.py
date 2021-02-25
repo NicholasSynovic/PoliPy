@@ -14,8 +14,10 @@ class MemberCollector:
         )
         self.scraper = None
 
-    def buildDatabase(self) -> None:
-        frontmatterSQL = "CREATE TABLE Members (ID INTEGER, Chamber TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXT, PRIMARY KEY(ID))"
+    def buildDatabase(self, chamber: str = "House") -> None:
+        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Chamber TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXT, PRIMARY KEY(ID))".format(
+            chamber + "_Members"
+        )
         self.databaseConnector.executeSQL(sql=frontmatterSQL)
 
     def createScraper(self) -> None:
