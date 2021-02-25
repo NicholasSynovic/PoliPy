@@ -1,10 +1,9 @@
 from json import dumps
 
-from progress.spinner import MoonSpinner
-
 from libs import congressAPI, databaseConnector, scraper
 from libs.cmdLineInterface import arguementHandling
 from libs.cmdLineOutput import errorMessage, neutralMessage, positiveMessage
+from progress.spinner import MoonSpinner
 
 
 class MemberCollector:

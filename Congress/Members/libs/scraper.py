@@ -1,8 +1,7 @@
 import re
+from math import ceil
 
 from bs4 import BeautifulSoup, Tag
-
-from math import ceil
 
 
 class Scraper:

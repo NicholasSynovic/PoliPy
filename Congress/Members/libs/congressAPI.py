@@ -3,7 +3,6 @@ from os import error
 
 import requests
 from bs4 import BeautifulSoup
-
 from libs.cmdLineOutput import errorMessage, neutralMessage, positiveMessage
 
 
