@@ -1,8 +1,10 @@
 from json import dumps
 
+from tqdm import tqdm
+
+from libs.cmdLineOutput import positiveMessage, neutralMessage, errorMessage
 from libs import congressAPI, databaseConnector, scraper
 from libs.cmdLineInterface import arguementHandling
-from tqdm import tqdm
 
 
 class MemberCollector:
@@ -28,6 +30,12 @@ class MemberCollector:
         self.databaseConnector.executeSQL(sql=sql, options=options)
 
     def startScraper(self):
+        print(
+            "\nPoliPy: {} Congress {} Chamber Member Scraper".format(
+                str(self.kwargs["congress"]), self.kwargs["chamber"]
+            )
+        )
+
         currentPage = self.congressAPI.get_CurrentPage()
         self.buildDatabase()
         self.createScraper()  # Initial Search/ Page 1
