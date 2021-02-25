@@ -1,4 +1,4 @@
-FROM python:3.9.1
+FROM python:3-buster
 COPY requirements.txt /opt/app/requirements.txt
 WORKDIR /opt/app
 RUN apt update && apt upgrade -y
