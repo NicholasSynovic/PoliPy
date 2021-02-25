@@ -1,5 +1,6 @@
-from bs4 import BeautifulSoup, Tag
 import re
+
+from bs4 import BeautifulSoup, Tag
 
 
 class Scraper:
