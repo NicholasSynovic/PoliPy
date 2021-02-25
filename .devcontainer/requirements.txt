@@ -3,5 +3,5 @@ black
 colorama
 isort
 lxml
+progress
 requests
-tqdm

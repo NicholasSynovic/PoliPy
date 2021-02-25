@@ -25,7 +25,8 @@ class CongressAPI:
                     message="Failed to get {}: ".format(self.url) + e.__str__()
                 )
             )
-
+            quit(2)
+        print(positiveMessage(message="Valid GET response from {}".format(self.url)))
         soup = BeautifulSoup(markup=req.content, features="lxml")
         return [soup, req]
 

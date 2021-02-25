@@ -1,6 +1,6 @@
 from json import dumps
 
-from tqdm import tqdm
+from progress.spinner import MoonSpinner
 
 from libs import congressAPI, databaseConnector, scraper
 from libs.cmdLineInterface import arguementHandling
@@ -9,7 +9,7 @@ from libs.cmdLineOutput import errorMessage, neutralMessage, positiveMessage
 
 class MemberCollector:
     def __init__(self, **kwargs) -> None:
-        self.tableName: str
+        self.chamber = kwargs["chamber"]
         self.kwargs = kwargs
         self.congressAPI = congressAPI.CongressAPI(dumps(kwargs))
         self.databaseConnector = databaseConnector.DatabaseConnector(
@@ -17,18 +17,14 @@ class MemberCollector:
         )
         self.scraper = None
 
-    def buildDatabase(self, chamber: str = "House") -> None:
-        self.tableName = chamber + "_Members"
-        print(
-            neutralMessage(
-                message="Attempting to create table {}".format(self.tableName)
-            )
-        )
+    def buildDatabase(self) -> None:
+        tableName = self.chamber + "_Members"
+        print(neutralMessage(message="Attempting to create table {}".format(tableName)))
         frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Chamber TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXT, PRIMARY KEY(ID))".format(
-            self.tableName
+            tableName
         )
         if self.databaseConnector.executeSQL(sql=frontmatterSQL):
-            print(positiveMessage(message="Created table {}".format(self.tableName)))
+            print(positiveMessage(message="Created table {}".format(tableName)))
 
     def createScraper(self) -> None:
         soup = self.congressAPI.sendRequest()[0]
@@ -43,33 +39,38 @@ class MemberCollector:
         self.createScraper()  # Initial Search/ Page 1
 
         if not self.scraper.check_SearchHasResults():
-            print("Invalid Congress Session or Chamber of Congress.")
+            print(
+                errorMessage(message="Invalid Congress Session or Chamber of Congress")
+            )
             quit()
 
-        count = self.scraper.get_TotalNumberofPages()
+        count = self.scraper.get_TotalNumberofItemsandPages()
+
         if count[1] > 100:
-            print("Search to broad, narrow search to continue.")
+            print(errorMessage(message="Search to broad, narrow search to continue"))
             quit()
 
         while True:
+            tableName = self.chamber + "_Members"
             pkCalculation = (currentPage - 1) * 250
             onPageData = self.scraper.get_DataPoints(startingPK=pkCalculation)
 
-            frontmatterSQL = "INSERT INTO {} (ID, Chamber, Name, URL, State, District, Party) VALUES (?,?,?,?,?,?,?)".format(
-                self.tableName
+            frontmatterSQL = "INSERT OR IGNORE INTO {} (ID, Chamber, Name, URL, State, District, Party) VALUES (?,?,?,?,?,?,?)".format(
+                tableName
             )
 
-            for member in tqdm(
-                onPageData,
-                desc="Storing {} (Page {})".format(self.tableName, currentPage),
-            ):
-                memberDataPoint = self.scraper.scrape_MemberDataPoints(
-                    primaryKey=member[0],
-                    member=member[2],
-                    chamber=self.kwargs["chamber"],
-                )
-                self.executeSQL(sql=frontmatterSQL, options=memberDataPoint)
-
+            with MoonSpinner(
+                neutralMessage("Inserting data into {}\t".format(tableName))
+            ) as spinner:
+                for member in onPageData:
+                    memberDataPoint = self.scraper.scrape_MemberDataPoints(
+                        primaryKey=member[0],
+                        member=member[2],
+                        chamber=self.kwargs["chamber"],
+                    )
+                    self.executeSQL(sql=frontmatterSQL, options=memberDataPoint)
+                    spinner.next()
+            print(positiveMessage(message="Stored data into {}".format(tableName)))
             currentPage = self.congressAPI.incrementPage()
             if currentPage > count[1]:
                 break

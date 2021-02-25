@@ -2,6 +2,8 @@ import re
 
 from bs4 import BeautifulSoup, Tag
 
+from math import ceil
+
 
 class Scraper:
     def __init__(self, soup: BeautifulSoup) -> None:
@@ -12,21 +14,16 @@ class Scraper:
             return True
         return False
 
-    def get_TotalNumberofPages(self) -> tuple:
-        def _get_Data(string: str) -> int:
-            data = 0
-            try:
-                data = int(
-                    re.findall("(?<=of )(\d+[,]\d+)", string)[0].replace(",", "")
-                )
-            except IndexError:
-                data = int(re.findall("(?<=of )(\d+)", string)[0])
-            return data
-
+    def get_TotalNumberofItemsandPages(self) -> tuple:
         response = self.soup.find_all(name="span", attrs={"class": "results-number"})
-        items = _get_Data(string=response[0].text)
-        pages = _get_Data(string=response[1].text)
-        return (items, pages)
+        items = 0
+        try:
+            items = int(
+                re.findall("(?<=of )(\d+[,]\d+)", response[0].text)[0].replace(",", "")
+            )
+        except IndexError:
+            items = int(re.findall("(?<=of )(\d+)", response[0].text)[0])
+        return (items, ceil(items / 250))
 
     def get_DataPoints(self, startingPK: int = 0) -> list:
         # (Primary Key, Type, Data)
