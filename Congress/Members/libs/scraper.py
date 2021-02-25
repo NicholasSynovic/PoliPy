@@ -1,6 +1,5 @@
 from bs4 import BeautifulSoup, Tag
 import re
-from tqdm import tqdm
 
 
 class Scraper:
