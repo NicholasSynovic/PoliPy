@@ -11,7 +11,7 @@ def positiveMessage(message: str = "Hello World"):
 
 
 def neutralMessage(message: str = "Hello World"):
-    return Fore.LIGHTBLUE_EX + "...\t" + message
+    return Fore.WHITE + "...\t" + message
 
 
 def errorMessage(message: str = "Hello World"):
