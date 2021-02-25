@@ -1,5 +1,4 @@
 from json import dumps
-from os import write
 
 from libs import congressAPI, databaseConnector, scraper
 from tqdm import tqdm
