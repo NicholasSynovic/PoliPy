@@ -175,15 +175,6 @@ class Scraper:
 
         data = _getItems(items=items)
 
-        # textURLData,
-        #     pdfURLData,
-        #     dateRecievedData,
-        #     topicData,
-        #     latestActionDateData,
-        #     latestActionTextData,
-        #     latestActionURLData,
-        # ]
-
         return (
             primaryKey,
             titleData,
