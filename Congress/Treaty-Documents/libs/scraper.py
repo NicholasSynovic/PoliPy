@@ -42,52 +42,19 @@ class Scraper:
                 break
         return dataPoints
 
-    def scrape_MemberDataPoints(
-        self, primaryKey: int, member: Tag, chamber: str = "House"
+    def scrape_TreatyDocumentFrontMatterDataPoints(
+        self, primaryKey: int, treaty: Tag
     ) -> tuple:
-        # (ID, Chamber, Name, URL, State, District, Party)
-        def _get_Name(string: str) -> str:
-            name = ""
-            positions = [
-                "Senator",
-                "Representative",
-                "Resident Commissioner",
-                "Delegate de",
-                "Delegate",
-            ]
-            positionsIndex = 0
-            while True:
-                try:
-                    name = re.findall(
-                        "(?<={} )(\D+)".format(positions[positionsIndex]), string
-                    )[0]
-                    return name
-                except IndexError:
-                    positionsIndex += 1
+        # (ID, Title, URL, Short_Title, Text_Link, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_Link)
 
-        header = member.find(name="span", attrs={"class": "result-heading"})
-        items = member.find(name="div", attrs={"class": "member-profile"}).find_all(
-            name="span", attrs={"class": "result-item"}
-        )
+        pass
 
-        nameData = _get_Name(string=header.text)
-        urlData = "https://www.congress.gov" + header.find(name="a").get("href")
-
-        stateData = items[0].find(name="span").text
-
-        if len(items) > 3:
-            districtData = items[1].find(name="span").text
-        else:
-            districtData = "N/A"
-
-        partyData = items[-2].find(name="span").text
-
-        return (
-            primaryKey,
-            chamber,
-            nameData,
-            urlData,
-            stateData,
-            districtData,
-            partyData,
-        )
+        # return (
+        #     primaryKey,
+        #     chamber,
+        #     nameData,
+        #     urlData,
+        #     stateData,
+        #     districtData,
+        #     partyData,
+        # )

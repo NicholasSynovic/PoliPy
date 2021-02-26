@@ -8,7 +8,6 @@ from progress.spinner import MoonSpinner
 
 class MemberCollector:
     def __init__(self, **kwargs) -> None:
-        self.chamber = kwargs["chamber"]
         self.kwargs = kwargs
         self.congressAPI = congressAPI.CongressAPI(dumps(kwargs))
         self.databaseConnector = databaseConnector.DatabaseConnector(
@@ -17,13 +16,10 @@ class MemberCollector:
         self.scraper = None
 
     def buildDatabase(self) -> None:
-        tableName = self.chamber + "_Members"
-        print(neutralMessage(message="Attempting to create table {}".format(tableName)))
-        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Chamber TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXT, PRIMARY KEY(ID))".format(
-            tableName
-        )
+        print(neutralMessage(message="Attempting to create table Treaty_Documents"))
+        frontmatterSQL = "CREATE TABLE Treaty_Documents (ID INTEGER, Title TEXT, URL TEXT, Short_Title TEXT, Text_Link TEXT, Date_Recieved TEXT, Topic TEXT, Latest_Action_Date TEXT, Latest_Action_Text TEXT, Latest_Action_Link TEXT, PRIMARY KEY(ID))"
         if self.databaseConnector.executeSQL(sql=frontmatterSQL):
-            print(positiveMessage(message="Created table {}".format(tableName)))
+            print(positiveMessage(message="Created table Treaty_Documents"))
 
     def createScraper(self) -> None:
         soup = self.congressAPI.sendRequest()[0]
@@ -38,9 +34,7 @@ class MemberCollector:
         self.createScraper()  # Initial Search/ Page 1
 
         if not self.scraper.check_SearchHasResults():
-            print(
-                errorMessage(message="Invalid Congress Session or Chamber of Congress")
-            )
+            print(errorMessage(message="Invalid Congress Session"))
             quit()
 
         count = self.scraper.get_TotalNumberofItemsandPages()
@@ -50,17 +44,17 @@ class MemberCollector:
             quit()
 
         while True:
-            tableName = self.chamber + "_Members"
             pkCalculation = (currentPage - 1) * 250
             onPageData = self.scraper.get_DataPoints(startingPK=pkCalculation)
 
-            frontmatterSQL = "INSERT OR IGNORE INTO {} (ID, Chamber, Name, URL, State, District, Party) VALUES (?,?,?,?,?,?,?)".format(
-                tableName
-            )
+            frontmatterSQL = "INSERT OR IGNORE INTO Treaty_Documents (ID, Title, URL, Short_Title, Text_Link, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_Link) VALUES (?,?,?,?,?,?,?,?,?,?)"
 
             with MoonSpinner(
-                neutralMessage("Inserting data into {}\t".format(tableName))
+                neutralMessage("Inserting data into Treaty_Documents\t")
             ) as spinner:
+
+                # TODO: FIX ME
+
                 for member in onPageData:
                     memberDataPoint = self.scraper.scrape_MemberDataPoints(
                         primaryKey=member[0],
@@ -69,7 +63,7 @@ class MemberCollector:
                     )
                     self.executeSQL(sql=frontmatterSQL, options=memberDataPoint)
                     spinner.next()
-            print(positiveMessage(message="Stored data into {}".format(tableName)))
+            print(positiveMessage(message="Stored data into Treaty_Documents"))
             currentPage = self.congressAPI.incrementPage()
             if currentPage > count[1]:
                 break
