@@ -31,4 +31,14 @@ def arguementHandling() -> Namespace:
         help="The Congress Session to scrape data from.",
     )
 
+    parser.add_argument(
+        "-c",
+        "--chamber",
+        nargs=1,
+        default="House",
+        type=str,
+        required=True,
+        help='The Congress Chamber to scrape data from. Can only be "House" or "Senate".',
+    )
+
     return parser.parse_args()
