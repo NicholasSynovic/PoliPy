@@ -47,6 +47,9 @@ class MemberCollector:
             pkCalculation = (currentPage - 1) * 250
             onPageData = self.scraper.get_DataPoints(startingPK=pkCalculation)
 
+            print(onPageData)
+            quit()
+
             frontmatterSQL = "INSERT OR IGNORE INTO Treaty_Documents (ID, Title, URL, Short_Title, Text_Link, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_Link) VALUES (?,?,?,?,?,?,?,?,?,?)"
 
             with MoonSpinner(
@@ -77,15 +80,14 @@ if __name__ == "__main__":
     cmdLineArgs = arguementHandling()
 
     print(
-        "\nPoliPy: {} Congress {} Chamber Member Scraper".format(
-            str(cmdLineArgs.session[0]), cmdLineArgs.chamber[0]
+        "\nPoliPy: {} Congress Treaty Documents Scraper".format(
+            str(cmdLineArgs.session[0])
         )
     )
 
     mc = MemberCollector(
         congress=cmdLineArgs.session[0],
-        source="members",
-        chamber=cmdLineArgs.chamber[0],
+        source="treaties",
     )
 
     mc.startScraper()
