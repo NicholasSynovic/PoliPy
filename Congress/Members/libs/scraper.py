@@ -80,7 +80,7 @@ class Scraper:
         if len(items) > 3:
             districtData = items[1].find(name="span").text
         else:
-            districtData = "N/A"
+            districtData = None
 
         partyData = items[-2].find(name="span").text
 
