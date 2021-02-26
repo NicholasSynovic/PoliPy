@@ -45,16 +45,56 @@ class Scraper:
     def scrape_TreatyDocumentFrontMatterDataPoints(
         self, primaryKey: int, treaty: Tag
     ) -> tuple:
-        # (ID, Title, URL, Short_Title, Text_Link, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_Link)
+        # (ID, Title, URL, Short_Title, Text_URL, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_URL)
 
-        pass
+        items = treaty.find_all(name="span", attrs={"class": "result-item"})
 
-        # return (
-        #     primaryKey,
-        #     chamber,
-        #     nameData,
-        #     urlData,
-        #     stateData,
-        #     districtData,
-        #     partyData,
-        # )
+        titleData = treaty.find(
+            name="span", attrs={"class": "result-heading"}
+        ).text.strip()
+
+        urlData = "https://www.congress.gov" + (
+            treaty.find(name="span", attrs={"class": "result-heading"})
+            .find(name="a")
+            .get("href")
+        )
+
+        shortTitleData = treaty.find(
+            name="span", attrs={"class": "result-title"}
+        ).text.strip()
+
+        if len(items) == 4:
+            textURLData = "https://www.congress.gov" + items[0].find(name="a").get(
+                "href"
+            )
+            dateRecievedData = items[1].text.split(":")[1].strip()
+            topicData = items[2].text.split(":")[1].strip()
+            latestAction = items[3].text.split(":")
+            latestActionDateData = latestAction[1].split(" - ")[0].strip()
+            latestActionTextData = latestAction[1].split(" - ")[1].strip()
+            latestActionURLData = "https://www.congress.gov" + items[3].find(
+                name="a"
+            ).get("href")
+        else:
+            textURLData = "N/A"
+            dateRecievedData = items[0].text.split(":")[1].strip()
+            topicData = items[1].text.split(":")[1].strip().split(" - ")[0]
+            latestAction = items[2].text.split(":")
+            latestActionDateData = latestAction[1].split(" - ")[0].strip()
+            latestActionTextData = latestAction[1].split(" - ")[1].strip()
+            latestActionURLData = "https://www.congress.gov" + items[2].find(
+                name="a"
+            ).get("href")
+
+        return (
+            primaryKey,
+            titleData,
+            urlData,
+            shortTitleData,
+            textURLData,
+            dateRecievedData,
+            topicData,
+            latestActionDateData,
+            latestActionTextData,
+            latestActionURLData,
+        )

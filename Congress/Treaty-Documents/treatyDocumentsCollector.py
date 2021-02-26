@@ -17,7 +17,7 @@ class MemberCollector:
 
     def buildDatabase(self) -> None:
         print(neutralMessage(message="Attempting to create table Treaty_Documents"))
-        frontmatterSQL = "CREATE TABLE Treaty_Documents (ID INTEGER, Title TEXT, URL TEXT, Short_Title TEXT, Text_Link TEXT, Date_Recieved TEXT, Topic TEXT, Latest_Action_Date TEXT, Latest_Action_Text TEXT, Latest_Action_Link TEXT, PRIMARY KEY(ID))"
+        frontmatterSQL = "CREATE TABLE Treaty_Documents (ID INTEGER, Title TEXT, URL TEXT, Short_Title TEXT, Text_URL TEXT, Date_Recieved TEXT, Topic TEXT, Latest_Action_Date TEXT, Latest_Action_Text TEXT, Latest_Action_URL TEXT, PRIMARY KEY(ID))"
         if self.databaseConnector.executeSQL(sql=frontmatterSQL):
             print(positiveMessage(message="Created table Treaty_Documents"))
 
@@ -47,10 +47,7 @@ class MemberCollector:
             pkCalculation = (currentPage - 1) * 250
             onPageData = self.scraper.get_DataPoints(startingPK=pkCalculation)
 
-            print(onPageData)
-            quit()
-
-            frontmatterSQL = "INSERT OR IGNORE INTO Treaty_Documents (ID, Title, URL, Short_Title, Text_Link, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_Link) VALUES (?,?,?,?,?,?,?,?,?,?)"
+            frontmatterSQL = "INSERT OR IGNORE INTO Treaty_Documents (ID, Title, URL, Short_Title, Text_URL, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_URL) VALUES (?,?,?,?,?,?,?,?,?,?)"
 
             with MoonSpinner(
                 neutralMessage("Inserting data into Treaty_Documents\t")
@@ -58,13 +55,14 @@ class MemberCollector:
 
                 # TODO: FIX ME
 
-                for member in onPageData:
-                    memberDataPoint = self.scraper.scrape_MemberDataPoints(
-                        primaryKey=member[0],
-                        member=member[2],
-                        chamber=self.kwargs["chamber"],
+                for treaty in onPageData:
+                    treatyDataPoint = (
+                        self.scraper.scrape_TreatyDocumentFrontMatterDataPoints(
+                            primaryKey=treaty[0],
+                            treaty=treaty[2],
+                        )
                     )
-                    self.executeSQL(sql=frontmatterSQL, options=memberDataPoint)
+                    self.executeSQL(sql=frontmatterSQL, options=treatyDataPoint)
                     spinner.next()
             print(positiveMessage(message="Stored data into Treaty_Documents"))
             currentPage = self.congressAPI.incrementPage()
