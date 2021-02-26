@@ -65,7 +65,7 @@ class MemberCollector:
                     self.executeSQL(sql=frontmatterSQL, options=treatyDataPoint)
                     spinner.next()
             print(positiveMessage(message="Stored data into Treaty_Documents"))
-            currentPage = self.congressAPI.incrementPage()
+            currentPage = self.congressAPI.get_CurrentPage() + 1
             if currentPage > count[1]:
                 break
 

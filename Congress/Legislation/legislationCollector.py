@@ -19,7 +19,7 @@ class MemberCollector:
     def buildDatabase(self) -> None:
         tableName = self.chamber + "_Legislation"
         print(neutralMessage(message="Attempting to create table {}".format(tableName)))
-        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Title TEXT, URL TEXT, Description TEXT, Sponsor TEXT, Sponsor_URL TEXT, Date_Introduced TEXT, Cosponsor_Amount INTEGER, Cosponsor_Amount_URL TEXT, Committees TEXT, Latest_Action_Chamber TEXT, Latest_Action_Date TEXT, Latest_Action_Description TEXT, Latest_Action_Chamber TEXT, PRIMARY KEY(ID))".format(
+        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Title TEXT, URL TEXT, Description TEXT, Sponsor TEXT, Sponsor_URL TEXT, Date_Introduced TEXT, Cosponsor_Amount INTEGER, Cosponsor_URL TEXT, Committees TEXT, Latest_Action_Chamber TEXT, Latest_Action_Date TEXT, Latest_Action_Description TEXT, Latest_Action_URL TEXT, Tracker TEXT, PRIMARY KEY(ID))".format(
             tableName
         )
         if self.databaseConnector.executeSQL(sql=frontmatterSQL):
@@ -48,11 +48,11 @@ class MemberCollector:
             quit()
 
         while True:
-            tableName = self.chamber + "_Members"
+            tableName = self.chamber + "_Legislation"
             pkCalculation = (currentPage - 1) * 250
             onPageData = self.scraper.get_DataPoints(startingPK=pkCalculation)
 
-            frontmatterSQL = "INSERT OR IGNORE INTO {} (ID, Title, URL, Short_Title, Text_URL, PDF_URL, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_URL) VALUES (?,?,?,?,?,?,?,?,?,?,?)".format(
+            frontmatterSQL = "INSERT OR IGNORE INTO {} (ID, Title, URL, Description, Sponsor, Sponsor_URL, Date_Introduced, Cosponsor_Amount, Cosponsor_URL, Committees, Latest_Action_Chamber, Latest_Action_Date, Latest_Action_Description, Latest_Action_URL, Tracker) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)".format(
                 tableName
             )
 
@@ -62,17 +62,17 @@ class MemberCollector:
 
                 # TODO: FIX ME
 
-                for treaty in onPageData:
-                    treatyDataPoint = (
-                        self.scraper.scrape_TreatyDocumentFrontMatterDataPoints(
-                            primaryKey=treaty[0],
-                            treaty=treaty[2],
+                for legislation in onPageData:
+                    legislationDataPoint = (
+                        self.scraper.scrape_LegislationFrontMatterDataPoints(
+                            primaryKey=legislation[0],
+                            legislation=legislation[2],
                         )
                     )
-                    self.executeSQL(sql=frontmatterSQL, options=treatyDataPoint)
+                    self.executeSQL(sql=frontmatterSQL, options=legislationDataPoint)
                     spinner.next()
             print(positiveMessage(message="Stored data into {}".format(tableName)))
-            currentPage = self.congressAPI.incrementPage()
+            currentPage = self.congressAPI.get_CurrentPage() + 1
             if currentPage > count[1]:
                 break
 

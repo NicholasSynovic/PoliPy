@@ -70,7 +70,7 @@ class MemberCollector:
                     self.executeSQL(sql=frontmatterSQL, options=memberDataPoint)
                     spinner.next()
             print(positiveMessage(message="Stored data into {}".format(tableName)))
-            currentPage = self.congressAPI.incrementPage()
+            currentPage = self.congressAPI.get_CurrentPage() + 1
             if currentPage > count[1]:
                 break
 

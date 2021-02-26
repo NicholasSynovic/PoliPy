@@ -1,5 +1,5 @@
 import re
-from math import ceil
+from math import ceil, cos
 
 from bs4 import BeautifulSoup, Tag
 from bs4.element import ResultSet
@@ -44,134 +44,111 @@ class Scraper:
         return dataPoints
 
     # TODO: Simplify method
-    def scrape_TreatyDocumentFrontMatterDataPoints(
-        self, primaryKey: int, treaty: Tag
+    def scrape_LegislationFrontMatterDataPoints(
+        self, primaryKey: int, legislation: Tag
     ) -> tuple:
-        # (ID, Title, URL, Short_Title, Text_URL, PDF_URL, Date_Recieved, Topic, Latest_Action_Date, Latest_Action_Text, Latest_Action_URL)
+        # Latest_Action_Chamber, Latest_Action_Date, Latest_Action_Description, Latest_Action_URL, Tracker
 
         # TODO: Simplify method
         def _getItems(items: ResultSet) -> list:
-            itemsLength = len(items)
+            sponsorContent = items[0]
 
-            if itemsLength == 4:
-                # Base case
-                docLinks: Tag = items[0]
-                textURLData: Tag = "https://www.congress.gov" + docLinks.find(
-                    name="a", text="TXT"
-                ).get("href")
-                try:
-                    pdfURLData: Tag = "https://www.congress.gov" + docLinks.find(
-                        name="a", text="PDF"
-                    ).get("href")
-                except AttributeError:
-                    pdfURLData = None
+            sponsorData = sponsorContent.text.split(":")[1].split("(")[0].strip()
 
-                dateRecievedData = items[1].text.split(":")[1].strip()
-                topicData = items[2].text.split(":")[1].strip()
+            sponsorLinks = sponsorContent.find_all(name="a")
 
-                latestAction = items[3].text.split(":")
+            try:
+                sponsorURLData = "https://www.congress.gov" + sponsorLinks[0].get(
+                    "href"
+                )
+            except Exception:
+                sponsorURLData = None
 
-                latestActionDateData = latestAction[1].split(" - ")[0].strip()
-                latestActionTextData = latestAction[1].split(" - ")[1].strip()
-                latestActionURLData = "https://www.congress.gov" + items[3].find(
+            try:
+                cosponsorData = sponsorLinks[1].text.strip()
+                cosponsorURLData = "https://www.congress.gov" + sponsorLinks[1].get(
+                    "href"
+                )
+            except Exception:
+                cosponsorData = None
+                cosponsorURLData = None
+
+            try:
+                dateIntroducedData = re.findall(
+                    "\(([^)]+)\)", sponsorContent.text.strip()
+                )[0].split(" ")[-1]
+            except Exception:
+                dateIntroducedData = None
+
+            committeesData = items[1].text.strip().split(" - ")[-1]
+
+            latestAction = items[2]
+
+            latestActionText = latestAction.text.strip()
+            latestActionChamberData = (
+                latestActionText.split(":")[1].split(" - ")[0].strip()
+            )
+            try:
+                latestActionChamberDateData = (
+                    latestActionText.split(" - ")[1].split(" ")[0].strip()
+                )
+            except Exception:
+                latestActionChamberDateData = latestActionText.split(" ")[0].strip()
+
+            latestActionChamberDescriptionData = (
+                latestActionText.split(latestActionChamberDateData)[-1]
+                .strip()
+                .split("(")[0]
+                .strip()
+            )
+            try:
+                latestActionURLData = "https://www.congress.gov" + latestAction.find(
                     name="a"
                 ).get("href")
+            except AttributeError:
+                latestActionURLData = None
 
-            elif itemsLength == 3:
-                # If there is a treaty text
-                topText: Tag = items[0]
-
-                if topText.text.split(":")[0].strip() == "Text of Treaty Document":
-                    dateRecievedData = items[1].text.split(":")[1].strip()
-                    textLinks = topText.find_all(name="a")
-
-                    textURLData = "https://www.congress.gov" + textLinks[0].get("href")
-                    try:
-                        pdfURLData = "https://www.congress.gov" + textLinks[1].get(
-                            "href"
-                        )
-                    except IndexError:
-                        pdfURLData = None
-
-                    potentialTopic = items[2].text.split(":")
-                    if potentialTopic[0].strip() == "Treaty Topic":
-                        topicData = potentialTopic[1].strip()
-                    else:
-                        topicData = None
-
-                else:
-                    # If there is not a treaty text
-                    dateRecievedData = topText.text.split(":")[1].strip()
-
-                    textURLData = None
-                    pdfURLData = None
-
-                    potentialTopic = items[1].text.split(":")
-                    if potentialTopic[0].strip() == "Treaty Topic":
-                        topicData = potentialTopic[1].strip()
-                    else:
-                        topicData = None
-
-                potentialActions = items[-1].text.split(":")
-                if potentialActions[0] == "Latest Senate Action":
-                    # If there are Latest Actions
-                    latestActionDateData = potentialActions[1].split(" - ")[0].strip()
-                    latestActionTextData = potentialActions[1].split(" - ")[1].strip()
-                    latestActionURLData = "https://www.congress.gov" + items[-1].find(
-                        name="a"
-                    ).get("href")
-                else:
-                    latestActionDateData = None
-                    latestActionTextData = None
-                    latestActionURLData = None
-
-            else:
-                # items length == 2
-                # No topic
-                # Only date and actions
-                textURLData = None
-                pdfURLData = None
-                dateRecievedData = items[0].text.split(":")[1].strip()
-                topicData = None
-
-                potentialActions = items[-1].text.split(":")
-
-                latestActionDateData = potentialActions[1].split(" - ")[0].strip()
-                latestActionTextData = potentialActions[1].split(" - ")[1].strip()
-                latestActionURLData = "https://www.congress.gov" + items[-1].find(
-                    name="a"
-                ).get("href")
-
-            if int(dateRecievedData.split("/")[-1]) < 1995:
-                # If the date is before 1995, there is no treaty text
-                textURLData = None
-                pdfURLData = None
+            try:
+                trackerData = (
+                    items[3]
+                    .find(name="p", attrs={"class": "hide_fromsighted"})
+                    .text.strip()
+                )
+            except Exception:
+                trackerData = None
 
             return [
-                textURLData,
-                pdfURLData,
-                dateRecievedData,
-                topicData,
-                latestActionDateData,
-                latestActionTextData,
+                sponsorData,
+                sponsorURLData,
+                dateIntroducedData,
+                cosponsorData,
+                cosponsorURLData,
+                committeesData,
+                latestActionChamberData,
+                latestActionChamberDateData,
+                latestActionChamberDescriptionData,
                 latestActionURLData,
+                trackerData,
             ]
 
-        items = treaty.find_all(name="span", attrs={"class": "result-item"})
+        items = legislation.find_all(name="span", attrs={"class": "result-item"})
 
-        titleData = treaty.find(
+        titleData = legislation.find(
             name="span", attrs={"class": "result-heading"}
         ).text.strip()
 
         urlData = "https://www.congress.gov" + (
-            treaty.find(name="span", attrs={"class": "result-heading"})
+            legislation.find(name="span", attrs={"class": "result-heading"})
             .find(name="a")
             .get("href")
         )
 
-        shortTitleData = treaty.find(
-            name="span", attrs={"class": "result-title"}
-        ).text.strip()
+        try:
+            descriptionData = legislation.find(
+                name="span", attrs={"class": "result-title"}
+            ).text.strip()
+        except Exception:
+            descriptionData = None
 
         data = _getItems(items=items)
 
@@ -179,7 +156,7 @@ class Scraper:
             primaryKey,
             titleData,
             urlData,
-            shortTitleData,
+            descriptionData,
             data[0],
             data[1],
             data[2],
@@ -187,4 +164,8 @@ class Scraper:
             data[4],
             data[5],
             data[6],
+            data[7],
+            data[8],
+            data[9],
+            data[10],
         )
