@@ -47,75 +47,67 @@ class Scraper:
     def scrape_LegislationFrontMatterDataPoints(
         self, primaryKey: int, legislation: Tag
     ) -> tuple:
-        # Latest_Action_Chamber, Latest_Action_Date, Latest_Action_Description, Latest_Action_URL, Tracker
-
         # TODO: Simplify method
-        def _getItems(items: ResultSet) -> list:
+        def _getItems(items: ResultSet, content: str) -> list:
+            sponsorData = None
+            sponsorURLData = None
+            dateIntroducedData = None
+            cosponsorData = None
+            cosponsorURLData = None
+            committeesData = None
+            latestActionChamberData = None
+            latestActionChamberDateData = None
+            latestActionChamberDescriptionData = None
+            latestActionURLData = None
+            trackerData = None
+
             sponsorContent = items[0]
 
-            sponsorData = sponsorContent.text.split(":")[1].split("(")[0].strip()
+            sponsorData = (
+                sponsorContent.text.split(":")[1]
+                .split("(")[0]
+                .strip()
+                .split(" [")[0]
+                .strip()
+            )
 
             sponsorLinks = sponsorContent.find_all(name="a")
 
-            try:
+            if content == "Bill" or content == "Law":
                 sponsorURLData = "https://www.congress.gov" + sponsorLinks[0].get(
                     "href"
                 )
-            except Exception:
-                sponsorURLData = None
-
-            try:
                 cosponsorData = sponsorLinks[1].text.strip()
                 cosponsorURLData = "https://www.congress.gov" + sponsorLinks[1].get(
                     "href"
                 )
-            except Exception:
-                cosponsorData = None
-                cosponsorURLData = None
-
-            try:
                 dateIntroducedData = re.findall(
                     "\(([^)]+)\)", sponsorContent.text.strip()
                 )[0].split(" ")[-1]
-            except Exception:
-                dateIntroducedData = None
+                committeesData = items[1].text.strip().split(" - ")[-1]
 
-            committeesData = items[1].text.strip().split(" - ")[-1]
-
-            latestAction = items[2]
-
-            latestActionText = latestAction.text.strip()
-            latestActionChamberData = (
-                latestActionText.split(":")[1].split(" - ")[0].strip()
-            )
-            try:
+                latestActionText = items[2].text.strip()
+                latestActionChamberData = (
+                    latestActionText.split(":")[1].split(" - ")[0].strip()
+                )
                 latestActionChamberDateData = (
                     latestActionText.split(" - ")[1].split(" ")[0].strip()
                 )
-            except Exception:
-                latestActionChamberDateData = latestActionText.split(" ")[0].strip()
-
-            latestActionChamberDescriptionData = (
-                latestActionText.split(latestActionChamberDateData)[-1]
-                .strip()
-                .split("(")[0]
-                .strip()
-            )
-            try:
-                latestActionURLData = "https://www.congress.gov" + latestAction.find(
+                latestActionChamberDescriptionData = (
+                    latestActionText.split(latestActionChamberDateData)[-1]
+                    .strip()
+                    .split("(")[0]
+                    .strip()
+                )
+                latestActionURLData = "https://www.congress.gov" + items[2].find(
                     name="a"
                 ).get("href")
-            except AttributeError:
-                latestActionURLData = None
 
-            try:
                 trackerData = (
                     items[3]
                     .find(name="p", attrs={"class": "hide_fromsighted"})
                     .text.strip()
                 )
-            except Exception:
-                trackerData = None
 
             return [
                 sponsorData,
@@ -133,9 +125,17 @@ class Scraper:
 
         items = legislation.find_all(name="span", attrs={"class": "result-item"})
 
-        titleData = legislation.find(
-            name="span", attrs={"class": "result-heading"}
-        ).text.strip()
+        typeData = (
+            legislation.find(name="span", attrs={"class": "visualIndicator"})
+            .text.strip()
+            .title()
+        )
+
+        titleData = (
+            legislation.find(name="span", attrs={"class": "result-heading"})
+            .text.strip()
+            .split(" — ")[0]
+        )
 
         urlData = "https://www.congress.gov" + (
             legislation.find(name="span", attrs={"class": "result-heading"})
@@ -150,10 +150,11 @@ class Scraper:
         except Exception:
             descriptionData = None
 
-        data = _getItems(items=items)
+        data = _getItems(items=items, content=typeData)
 
         return (
             primaryKey,
+            typeData,
             titleData,
             urlData,
             descriptionData,

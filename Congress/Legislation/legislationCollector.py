@@ -19,7 +19,7 @@ class MemberCollector:
     def buildDatabase(self) -> None:
         tableName = self.chamber + "_Legislation"
         print(neutralMessage(message="Attempting to create table {}".format(tableName)))
-        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Title TEXT, URL TEXT, Description TEXT, Sponsor TEXT, Sponsor_URL TEXT, Date_Introduced TEXT, Cosponsor_Amount INTEGER, Cosponsor_URL TEXT, Committees TEXT, Latest_Action_Chamber TEXT, Latest_Action_Date TEXT, Latest_Action_Description TEXT, Latest_Action_URL TEXT, Tracker TEXT, PRIMARY KEY(ID))".format(
+        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Type TEXT, Title TEXT, URL TEXT, Description TEXT, Sponsor TEXT, Sponsor_URL TEXT, Date_Introduced TEXT, Cosponsor_Amount INTEGER, Cosponsor_URL TEXT, Committees TEXT, Latest_Action_Chamber TEXT, Latest_Action_Date TEXT, Latest_Action_Description TEXT, Latest_Action_URL TEXT, Tracker TEXT, PRIMARY KEY(ID))".format(
             tableName
         )
         if self.databaseConnector.executeSQL(sql=frontmatterSQL):
@@ -52,7 +52,7 @@ class MemberCollector:
             pkCalculation = (currentPage - 1) * 250
             onPageData = self.scraper.get_DataPoints(startingPK=pkCalculation)
 
-            frontmatterSQL = "INSERT OR IGNORE INTO {} (ID, Title, URL, Description, Sponsor, Sponsor_URL, Date_Introduced, Cosponsor_Amount, Cosponsor_URL, Committees, Latest_Action_Chamber, Latest_Action_Date, Latest_Action_Description, Latest_Action_URL, Tracker) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)".format(
+            frontmatterSQL = "INSERT OR IGNORE INTO {} (ID, Type, Title, URL, Description, Sponsor, Sponsor_URL, Date_Introduced, Cosponsor_Amount, Cosponsor_URL, Committees, Latest_Action_Chamber, Latest_Action_Date, Latest_Action_Description, Latest_Action_URL, Tracker) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)".format(
                 tableName
             )
 
