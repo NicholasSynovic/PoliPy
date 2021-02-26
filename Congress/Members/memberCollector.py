@@ -19,7 +19,7 @@ class MemberCollector:
     def buildDatabase(self) -> None:
         tableName = self.chamber + "_Members"
         print(neutralMessage(message="Attempting to create table {}".format(tableName)))
-        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Chamber TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXT, PRIMARY KEY(ID))".format(
+        frontmatterSQL = "CREATE TABLE {} (ID INTEGER, Chamber TEXT, Title TEXT, Name TEXT, URL TEXT, State TEXT, District TEXT, Party TEXT, PRIMARY KEY(ID))".format(
             tableName
         )
         if self.databaseConnector.executeSQL(sql=frontmatterSQL):
@@ -54,7 +54,7 @@ class MemberCollector:
             pkCalculation = (currentPage - 1) * 250
             onPageData = self.scraper.get_DataPoints(startingPK=pkCalculation)
 
-            frontmatterSQL = "INSERT OR IGNORE INTO {} (ID, Chamber, Name, URL, State, District, Party) VALUES (?,?,?,?,?,?,?)".format(
+            frontmatterSQL = "INSERT OR IGNORE INTO {} (ID, Chamber, Title, Name, URL, State, District, Party) VALUES (?,?,?,?,?,?,?,?)".format(
                 tableName
             )
 

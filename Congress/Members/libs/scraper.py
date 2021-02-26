@@ -45,8 +45,8 @@ class Scraper:
     def scrape_MemberDataPoints(
         self, primaryKey: int, member: Tag, chamber: str = "House"
     ) -> tuple:
-        # (ID, Chamber, Name, URL, State, District, Party)
-        def _get_Name(string: str) -> str:
+        # (ID, Chamber, Title, Name, URL, State, District, Party)
+        def _get_Name(string: str) -> tuple:
             name = ""
             positions = [
                 "Senator",
@@ -61,7 +61,7 @@ class Scraper:
                     name = re.findall(
                         "(?<={} )(\D+)".format(positions[positionsIndex]), string
                     )[0]
-                    return name
+                    return (name, positions[positionsIndex])
                 except IndexError:
                     positionsIndex += 1
 
@@ -70,7 +70,9 @@ class Scraper:
             name="span", attrs={"class": "result-item"}
         )
 
-        nameData = _get_Name(string=header.text)
+        nameTitle = _get_Name(string=header.text)
+        nameData = nameTitle[0]
+        titleData = nameTitle[1]
         urlData = "https://www.congress.gov" + header.find(name="a").get("href")
 
         stateData = items[0].find(name="span").text
@@ -85,6 +87,7 @@ class Scraper:
         return (
             primaryKey,
             chamber,
+            titleData,
             nameData,
             urlData,
             stateData,
